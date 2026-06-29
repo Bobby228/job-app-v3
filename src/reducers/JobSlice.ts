@@ -1,0 +1,79 @@
+import {createSlice} from "@reduxjs/toolkit";
+import { fetchJobs } from "./JobThunks.ts";
+import type {Job} from "../types.ts";
+
+interface JobState {
+  jobsList: Job[],
+  skills: string[],
+  isLoading: boolean;
+
+  search: string;
+  page: number;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+  } | null;
+}
+
+const initialState: JobState = {
+  jobsList: [],
+  skills: [
+    'JavaScript',
+    'React',
+    'Redux',
+    'ReduxToolkit',
+    'NextJs'
+  ],
+  isLoading: true,
+
+  search: '',
+  page: 1,
+  pagination: null,
+}
+
+export const jobSlice = createSlice({
+  name: 'jobs',
+  initialState,
+  reducers: {
+    setSkill(state, action) {
+      state.skills.push(action.payload);
+    },
+    removeSkill(state, action) {
+      state.skills = state.skills.filter(skill => skill !== action.payload);
+    },
+    setSearch(state, action) {
+      state.search = action.payload;
+    },
+    setPage(state, action) {
+      state.page = action.payload;
+    },
+    setSkills(state, action) {
+      state.skills = action.payload;
+    }
+  },
+
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchJobs.pending, state => {
+      state.isLoading = true;
+    })
+      .addCase(fetchJobs.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.jobsList = action.payload.jobs;
+        state.pagination = action.payload.pagination;
+      })
+      .addCase(fetchJobs.rejected, (state) => {
+        state.isLoading = false;
+      })
+  }
+})
+
+export const {
+  setSkill,
+  removeSkill,
+  setSearch,
+  setPage,
+  setSkills
+} = jobSlice.actions;
+
+export default jobSlice.reducer;
